@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use \Pusher\Pusher;
 
 class HomeController extends Controller
 {
@@ -19,10 +20,25 @@ class HomeController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
         return view('home');
+    }
+
+    public function authenticate(Request $request) {
+        $socketId = $request->socket_id;
+        $channelName = $request->channel_name;
+
+        $pusher = new Pusher('2315734eb4dcfd0b6d47', 'd4bb173ee80c0e76d8ce', '1018127', [
+            'cluster' => 'ap2',
+            'encrypted' => true
+        ]);
+
+        $presence_data = ['name' => auth()->user()->name];
+        $key = $pusher->presence_auth($channelName, $socketId, auth()->id(), $presence_data);
+
+        return response($key);
     }
 }
